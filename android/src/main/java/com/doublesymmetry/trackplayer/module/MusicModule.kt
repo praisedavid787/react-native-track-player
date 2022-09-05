@@ -466,12 +466,8 @@ class MusicModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod
     fun getCurrentTrack(callback: Promise) = scope.launch {
         if (verifyServiceBoundOrReject(callback)) return@launch
-        val currentTrackIndex = musicService.getCurrentTrackIndex()
-        if (currentTrackIndex >= 0 || currentTrackIndex < musicService.tracks.size) {
-            callback.resolve(currentTrackIndex)
-        } else {
-            callback.resolve(null)
-        }
+
+        callback.resolve(musicService.getCurrentTrackIndex())
     }
 
     @ReactMethod

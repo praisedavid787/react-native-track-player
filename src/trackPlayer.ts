@@ -276,7 +276,7 @@ async function getQueue(): Promise<Track[]> {
 /**
  * Gets the index of the current track.
  */
-async function getCurrentTrack(): Promise<number | null> {
+async function getCurrentTrack(): Promise<number> {
   return TrackPlayer.getCurrentTrack();
 }
 
