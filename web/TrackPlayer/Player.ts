@@ -39,11 +39,11 @@ export class Player {
     if (typeof window === 'undefined') return;
     if (this.hasInitialized === true) {
       // TODO: double check the structure of this error message
-      throw { code: 'player_already_initialized', message: 'The player is not initialized. Call setupPlayer first.' };
+      throw { code: 'player_already_initialized', message: 'The player has already been initialized via setupPlayer.' };
     }
 
     // @ts-ignore
-    const shaka = await import('shaka-player/dist/shaka-player.ui');
+    const shaka = (await import('shaka-player/dist/shaka-player.ui')).default;
     // Install built-in polyfills to patch browser incompatibilities.
     shaka.polyfill.installAll();
     // Check to see if the browser supports the basic APIs Shaka needs.
