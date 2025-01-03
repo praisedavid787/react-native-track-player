@@ -7,6 +7,7 @@ lib/
 DerivedData/
 package-lock.json
 .idea/
+.vscode/
 
 # Android
 
