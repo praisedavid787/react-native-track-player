@@ -2,10 +2,11 @@ import {
   AppRegistry,
   DeviceEventEmitter,
   NativeEventEmitter,
+  NativeModule,
   Platform,
 } from 'react-native';
 
-import TrackPlayer from './TrackPlayerModule';
+import TrackPlayer from './NativeRNTP';
 import { Event, RepeatMode, State } from './constants';
 import type {
   AddTrack,
@@ -23,7 +24,7 @@ import resolveAssetSource from './resolveAssetSource';
 
 const emitter =
   Platform.OS !== 'android'
-    ? new NativeEventEmitter(TrackPlayer)
+    ? new NativeEventEmitter(TrackPlayer as unknown as NativeModule ?? undefined)
     : DeviceEventEmitter;
 
 // MARK: - Helpers
@@ -56,7 +57,7 @@ function resolveImportedAsset(id?: number) {
  * @see https://rntp.dev/docs/api/functions/lifecycle
  */
 export async function setupPlayer(options: PlayerOptions = {}): Promise<void> {
-  return TrackPlayer.setupPlayer(options);
+  return TrackPlayer?.setupPlayer(options);
 }
 
 /**
@@ -87,7 +88,7 @@ export function addEventListener<T extends Event>(
  * @deprecated This method should not be used, most methods reject when service is not bound.
  */
 export function isServiceRunning(): Promise<boolean> {
-  return TrackPlayer.isServiceRunning();
+  return TrackPlayer?.isServiceRunning() ?? Promise.resolve(false);
 }
 
 // MARK: - Queue API
@@ -127,7 +128,7 @@ export async function add(
   );
   return resolvedTracks.length < 1
     ? undefined
-    : TrackPlayer.add(resolvedTracks, insertBeforeIndex);
+    : TrackPlayer?.add(resolvedTracks as unknown as (AddTrack[]), insertBeforeIndex);
 }
 
 /**
@@ -136,7 +137,7 @@ export async function add(
  * @param track The track to load.
  */
 export async function load(track: Track): Promise<number | void> {
-  return TrackPlayer.load(track);
+  return TrackPlayer?.load(track);
 }
 
 /**
@@ -147,7 +148,7 @@ export async function load(track: Track): Promise<number | void> {
  * the size of the queue, then the track is moved to the end of the queue.
  */
 export async function move(fromIndex: number, toIndex: number): Promise<void> {
-  return TrackPlayer.move(fromIndex, toIndex);
+  return TrackPlayer?.move(fromIndex, toIndex);
 }
 
 /**
@@ -171,7 +172,7 @@ export async function remove(indexes: number[]): Promise<void>;
  */
 export async function remove(index: number): Promise<void>;
 export async function remove(indexOrIndexes: number | number[]): Promise<void> {
-  return TrackPlayer.remove(
+  return TrackPlayer?.remove(
     Array.isArray(indexOrIndexes) ? indexOrIndexes : [indexOrIndexes]
   );
 }
@@ -180,7 +181,7 @@ export async function remove(indexOrIndexes: number | number[]): Promise<void> {
  * Clears any upcoming tracks from the queue.
  */
 export async function removeUpcomingTracks(): Promise<void> {
-  return TrackPlayer.removeUpcomingTracks();
+  return TrackPlayer?.removeUpcomingTracks();
 }
 
 /**
@@ -190,7 +191,7 @@ export async function removeUpcomingTracks(): Promise<void> {
  * @param initialPosition (Optional) The initial position to seek to in seconds.
  */
 export async function skip(index: number, initialPosition = -1): Promise<void> {
-  return TrackPlayer.skip(index, initialPosition);
+  return TrackPlayer?.skip(index, initialPosition);
 }
 
 /**
@@ -199,7 +200,7 @@ export async function skip(index: number, initialPosition = -1): Promise<void> {
  * @param initialPosition (Optional) The initial position to seek to in seconds.
  */
 export async function skipToNext(initialPosition = -1): Promise<void> {
-  return TrackPlayer.skipToNext(initialPosition);
+  return TrackPlayer?.skipToNext(initialPosition);
 }
 
 /**
@@ -208,7 +209,7 @@ export async function skipToNext(initialPosition = -1): Promise<void> {
  * @param initialPosition (Optional) The initial position to seek to in seconds.
  */
 export async function skipToPrevious(initialPosition = -1): Promise<void> {
-  return TrackPlayer.skipToPrevious(initialPosition);
+  return TrackPlayer?.skipToPrevious(initialPosition);
 }
 
 // MARK: - Control Center / Notifications API
@@ -223,7 +224,7 @@ export async function updateOptions({
   alwaysPauseOnInterruption,
   ...options
 }: UpdateOptions = {}): Promise<void> {
-  return TrackPlayer.updateOptions({
+  return TrackPlayer?.updateOptions({
     ...options,
     android: {
       // Handle deprecated alwaysPauseOnInterruption option:
@@ -231,14 +232,14 @@ export async function updateOptions({
         options.android?.alwaysPauseOnInterruption ?? alwaysPauseOnInterruption,
       ...options.android,
     },
-    icon: resolveImportedAsset(options.icon),
-    playIcon: resolveImportedAsset(options.playIcon),
-    pauseIcon: resolveImportedAsset(options.pauseIcon),
-    stopIcon: resolveImportedAsset(options.stopIcon),
-    previousIcon: resolveImportedAsset(options.previousIcon),
-    nextIcon: resolveImportedAsset(options.nextIcon),
-    rewindIcon: resolveImportedAsset(options.rewindIcon),
-    forwardIcon: resolveImportedAsset(options.forwardIcon),
+    icon: resolveImportedAsset(options.icon) as number | undefined,
+    playIcon: resolveImportedAsset(options.playIcon) as number | undefined,
+    pauseIcon: resolveImportedAsset(options.pauseIcon) as number | undefined,
+    stopIcon: resolveImportedAsset(options.stopIcon) as number | undefined,
+    previousIcon: resolveImportedAsset(options.previousIcon) as number | undefined,
+    nextIcon: resolveImportedAsset(options.nextIcon) as number | undefined,
+    rewindIcon: resolveImportedAsset(options.rewindIcon) as number | undefined,
+    forwardIcon: resolveImportedAsset(options.forwardIcon) as number | undefined,
   });
 }
 
@@ -253,9 +254,9 @@ export async function updateMetadataForTrack(
   trackIndex: number,
   metadata: TrackMetadataBase
 ): Promise<void> {
-  return TrackPlayer.updateMetadataForTrack(trackIndex, {
+  return TrackPlayer?.updateMetadataForTrack(trackIndex, {
     ...metadata,
-    artwork: resolveImportedAssetOrPath(metadata.artwork),
+    artwork: resolveImportedAssetOrPath(metadata.artwork) as string,
   });
 }
 
@@ -265,7 +266,7 @@ export async function updateMetadataForTrack(
  * https://github.com/doublesymmetry/react-native-track-player/issues/1653
  */
 export function clearNowPlayingMetadata(): Promise<void> {
-  return TrackPlayer.clearNowPlayingMetadata();
+  return TrackPlayer?.clearNowPlayingMetadata() ?? Promise.resolve();
 }
 
 /**
@@ -275,10 +276,10 @@ export function clearNowPlayingMetadata(): Promise<void> {
 export function updateNowPlayingMetadata(
   metadata: NowPlayingMetadata
 ): Promise<void> {
-  return TrackPlayer.updateNowPlayingMetadata({
+  return TrackPlayer?.updateNowPlayingMetadata({
     ...metadata,
-    artwork: resolveImportedAssetOrPath(metadata.artwork),
-  });
+    artwork: resolveImportedAssetOrPath(metadata.artwork) as string,
+  }) ?? Promise.resolve();
 }
 
 // MARK: - Player API
@@ -287,28 +288,28 @@ export function updateNowPlayingMetadata(
  * Resets the player stopping the current track and clearing the queue.
  */
 export async function reset(): Promise<void> {
-  return TrackPlayer.reset();
+  return TrackPlayer?.reset();
 }
 
 /**
  * Plays or resumes the current track.
  */
 export async function play(): Promise<void> {
-  return TrackPlayer.play();
+  return TrackPlayer?.play();
 }
 
 /**
  * Pauses the current track.
  */
 export async function pause(): Promise<void> {
-  return TrackPlayer.pause();
+  return TrackPlayer?.pause();
 }
 
 /**
  * Stops the current track.
  */
 export async function stop(): Promise<void> {
-  return TrackPlayer.stop();
+  return TrackPlayer?.stop();
 }
 
 /**
@@ -319,14 +320,14 @@ export async function stop(): Promise<void> {
 export async function setPlayWhenReady(
   playWhenReady: boolean
 ): Promise<boolean> {
-  return TrackPlayer.setPlayWhenReady(playWhenReady);
+  return TrackPlayer?.setPlayWhenReady(playWhenReady) ?? Promise.resolve(true);
 }
 
 /**
  * Gets whether the player will play automatically when it is ready to do so.
  */
 export async function getPlayWhenReady(): Promise<boolean> {
-  return TrackPlayer.getPlayWhenReady();
+  return TrackPlayer?.getPlayWhenReady() ?? Promise.resolve(true);
 }
 
 /**
@@ -335,7 +336,7 @@ export async function getPlayWhenReady(): Promise<boolean> {
  * @param position The position to seek to in seconds.
  */
 export async function seekTo(position: number): Promise<void> {
-  return TrackPlayer.seekTo(position);
+  return TrackPlayer?.seekTo(position);
 }
 
 /**
@@ -344,7 +345,7 @@ export async function seekTo(position: number): Promise<void> {
  * @param offset The time offset to seek by in seconds.
  */
 export async function seekBy(offset: number): Promise<void> {
-  return TrackPlayer.seekBy(offset);
+  return TrackPlayer?.seekBy(offset);
 }
 
 /**
@@ -353,7 +354,7 @@ export async function seekBy(offset: number): Promise<void> {
  * @param volume The volume as a number between 0 and 1.
  */
 export async function setVolume(level: number): Promise<void> {
-  return TrackPlayer.setVolume(level);
+  return TrackPlayer?.setVolume(level);
 }
 
 /**
@@ -363,7 +364,7 @@ export async function setVolume(level: number): Promise<void> {
  * 1 would be regular speed, 2 would be double speed etc.
  */
 export async function setRate(rate: number): Promise<void> {
-  return TrackPlayer.setRate(rate);
+  return TrackPlayer?.setRate(rate);
 }
 
 /**
@@ -373,7 +374,7 @@ export async function setRate(rate: number): Promise<void> {
  * @see https://rntp.dev/docs/api/constants/repeat-mode
  */
 export async function setQueue(tracks: Track[]): Promise<void> {
-  return TrackPlayer.setQueue(tracks);
+  return TrackPlayer?.setQueue(tracks);
 }
 
 /**
@@ -383,7 +384,7 @@ export async function setQueue(tracks: Track[]): Promise<void> {
  * @see https://rntp.dev/docs/api/constants/repeat-mode
  */
 export async function setRepeatMode(mode: RepeatMode): Promise<RepeatMode> {
-  return TrackPlayer.setRepeatMode(mode);
+  return TrackPlayer?.setRepeatMode(mode as unknown as number) as unknown as RepeatMode ?? Promise.resolve(RepeatMode.Off);
 }
 
 // MARK: - Getters
@@ -392,7 +393,7 @@ export async function setRepeatMode(mode: RepeatMode): Promise<RepeatMode> {
  * Gets the volume of the player as a number between 0 and 1.
  */
 export async function getVolume(): Promise<number> {
-  return TrackPlayer.getVolume();
+  return TrackPlayer?.getVolume() ?? Promise.resolve(0);
 }
 
 /**
@@ -400,7 +401,7 @@ export async function getVolume(): Promise<number> {
  * regular speed and 2 would be double speed etc.
  */
 export async function getRate(): Promise<number> {
-  return TrackPlayer.getRate();
+  return TrackPlayer?.getRate() ?? Promise.resolve(1.0);
 }
 
 /**
@@ -411,14 +412,14 @@ export async function getRate(): Promise<number> {
  * index.
  */
 export async function getTrack(index: number): Promise<Track | undefined> {
-  return TrackPlayer.getTrack(index);
+  return TrackPlayer?.getTrack(index) as unknown as Track;
 }
 
 /**
  * Gets the whole queue.
  */
 export async function getQueue(): Promise<Track[]> {
-  return TrackPlayer.getQueue();
+  return (TrackPlayer?.getQueue() ?? Promise.resolve([])) as unknown as Track[];
 }
 
 /**
@@ -426,14 +427,14 @@ export async function getQueue(): Promise<Track[]> {
  * current track.
  */
 export async function getActiveTrackIndex(): Promise<number | undefined> {
-  return (await TrackPlayer.getActiveTrackIndex()) ?? undefined;
+  return (await TrackPlayer?.getActiveTrackIndex()) ?? undefined;
 }
 
 /**
  * Gets the active track or undefined if there is no current track.
  */
 export async function getActiveTrack(): Promise<Track | undefined> {
-  return (await TrackPlayer.getActiveTrack()) ?? undefined;
+  return (await TrackPlayer?.getActiveTrack()) as unknown as Track ?? undefined;
 }
 
 /**
@@ -442,7 +443,8 @@ export async function getActiveTrack(): Promise<Track | undefined> {
  * @deprecated use `TrackPlayer.getActiveTrackIndex()` instead.
  */
 export async function getCurrentTrack(): Promise<number | null> {
-  return TrackPlayer.getActiveTrackIndex();
+  const activeTrackIndex = await TrackPlayer?.getActiveTrackIndex();
+  return activeTrackIndex !== undefined ? activeTrackIndex : null;
 }
 
 /**
@@ -450,7 +452,7 @@ export async function getCurrentTrack(): Promise<number | null> {
  * @deprecated Use `TrackPlayer.getProgress().then((progress) => progress.duration)` instead.
  */
 export async function getDuration(): Promise<number> {
-  return TrackPlayer.getDuration();
+  return TrackPlayer?.getDuration() ?? Promise.resolve(0);
 }
 
 /**
@@ -459,7 +461,7 @@ export async function getDuration(): Promise<number> {
  * @deprecated Use `TrackPlayer.getProgress().then((progress) => progress.buffered)` instead.
  */
 export async function getBufferedPosition(): Promise<number> {
-  return TrackPlayer.getBufferedPosition();
+  return TrackPlayer?.getBufferedPosition() ?? Promise.resolve(0);
 }
 
 /**
@@ -467,7 +469,7 @@ export async function getBufferedPosition(): Promise<number> {
  * @deprecated Use `TrackPlayer.getProgress().then((progress) => progress.position)` instead.
  */
 export async function getPosition(): Promise<number> {
-  return TrackPlayer.getPosition();
+  return TrackPlayer?.getPosition() ?? Promise.resolve(0);
 }
 
 /**
@@ -476,14 +478,14 @@ export async function getPosition(): Promise<number> {
  * duration in seconds.
  */
 export async function getProgress(): Promise<Progress> {
-  return TrackPlayer.getProgress();
+  return TrackPlayer?.getProgress() as unknown as Progress ?? {} as Progress;
 }
 
 /**
  * @deprecated use (await getPlaybackState()).state instead.
  */
 export async function getState(): Promise<State> {
-  return (await TrackPlayer.getPlaybackState()).state;
+  return (await TrackPlayer?.getPlaybackState() as PlaybackState)?.state as unknown as State ?? {} as State;
 }
 
 /**
@@ -492,7 +494,7 @@ export async function getState(): Promise<State> {
  * @see https://rntp.dev/docs/api/constants/state
  */
 export async function getPlaybackState(): Promise<PlaybackState> {
-  return TrackPlayer.getPlaybackState();
+  return TrackPlayer?.getPlaybackState() as unknown as PlaybackState ?? {} as PlaybackState;
 }
 
 /**
@@ -501,12 +503,12 @@ export async function getPlaybackState(): Promise<PlaybackState> {
  * @see https://rntp.dev/docs/api/constants/repeat-mode
  */
 export async function getRepeatMode(): Promise<RepeatMode> {
-  return TrackPlayer.getRepeatMode();
+  return TrackPlayer?.getRepeatMode() as unknown as RepeatMode ?? Promise.resolve(RepeatMode.Off);
 }
 
 /**
  * Retries the current item when the playback state is `State.Error`.
  */
 export async function retry() {
-  return TrackPlayer.retry();
+  return TrackPlayer?.retry();
 }

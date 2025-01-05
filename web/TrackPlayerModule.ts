@@ -7,6 +7,7 @@ import { SetupNotCalledError } from './TrackPlayer/SetupNotCalledError';
 
 export class TrackPlayerModule extends PlaylistPlayer {
   protected emitter = DeviceEventEmitter;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected progressUpdateEventInterval: any;
 
   // Capabilities
@@ -93,7 +94,7 @@ export class TrackPlayerModule extends PlaylistPlayer {
   }
 
   protected async onTrackEnded() {
-    const position = this.element!.currentTime;
+    const position = this.element?.currentTime;
     await super.onTrackEnded();
 
     this.emitter.emit(Event.PlaybackTrackChanged, {
@@ -107,7 +108,7 @@ export class TrackPlayerModule extends PlaylistPlayer {
     await super.onPlaylistEnded();
     this.emitter.emit(Event.PlaybackQueueEnded, {
       track: this.currentIndex,
-      position: this.element!.currentTime,
+      position: this.element?.currentTime,
     });
   }
 
@@ -178,4 +179,4 @@ export class TrackPlayerModule extends PlaylistPlayer {
   public getPlaybackState(): PlaybackState {
     return this.state;
   }
-};
+}
