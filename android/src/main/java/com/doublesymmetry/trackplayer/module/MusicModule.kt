@@ -277,8 +277,8 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(isServiceBound)
     }
 
-    override fun updateOptions(data: ReadableMap?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun updateOptions(data: ReadableMap?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         val options = Arguments.toBundle(data)
 
@@ -289,14 +289,14 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(null)
     }
 
-    override fun add(data: ReadableArray, insertBeforeIndex: Double?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun add(data: ReadableArray, insertBeforeIndex: Double?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         try {
             val tracks = readableArrayToTrackList(data);
             if ((insertBeforeIndex?.toInt() ?: 0) < -1 || (insertBeforeIndex?.toInt() ?: 0) > musicService.tracks.size) {
                 callback.reject("index_out_of_bounds", "The track index is out of bounds")
-                return
+                return@launchInScope
             }
             val index = if ((insertBeforeIndex?.toInt() ?: 0) == -1) musicService.tracks.size else insertBeforeIndex
             musicService.add(
@@ -309,11 +309,11 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         }
     }
 
-    override fun load(data: ReadableMap?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun load(data: ReadableMap?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
         if (data == null) {
             callback.resolve(null)
-            return
+            return@launchInScope
         }
         val bundle = Arguments.toBundle(data);
         if (bundle is Bundle) {
@@ -324,14 +324,14 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         }
     }
 
-    override fun move(fromIndex: Double, toIndex: Double, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun move(fromIndex: Double, toIndex: Double, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
         musicService.move(fromIndex.toInt(), toIndex.toInt())
         callback.resolve(null)
     }
 
-    override fun remove(data: ReadableArray?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun remove(data: ReadableArray?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
         val inputIndexes = Arguments.toList(data)
         if (inputIndexes != null) {
             val size = musicService.tracks.size
@@ -343,7 +343,7 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
                         "index_out_of_bounds",
                         "One or more indexes was out of bounds"
                     )
-                    return
+                    return@launchInScope
                 }
                 indexes.add(index)
             }
@@ -352,24 +352,23 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(null)
     }
 
-    override fun updateMetadataForTrack(index: Double, map: ReadableMap?, callback: Promise) =
-        run {
-            if (verifyServiceBoundOrReject(callback)) return
+    override fun updateMetadataForTrack(index: Double, map: ReadableMap?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
-            if (index < 0 || index >= musicService.tracks.size) {
-                callback.reject("index_out_of_bounds", "The index is out of bounds")
-            } else {
-                val context: ReactContext = context
-                val track = musicService.tracks[index.toInt()]
-                track.setMetadata(context, Arguments.toBundle(map), musicService.ratingType)
-                musicService.updateMetadataForTrack(index.toInt(), track)
+        if (index < 0 || index >= musicService.tracks.size) {
+            callback.reject("index_out_of_bounds", "The index is out of bounds")
+        } else {
+            val context: ReactContext = context
+            val track = musicService.tracks[index.toInt()]
+            track.setMetadata(context, Arguments.toBundle(map), musicService.ratingType)
+            musicService.updateMetadataForTrack(index.toInt(), track)
 
-                callback.resolve(null)
-            }
+            callback.resolve(null)
         }
+    }
 
-    override fun updateNowPlayingMetadata(map: ReadableMap?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun updateNowPlayingMetadata(map: ReadableMap?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         if (musicService.tracks.isEmpty())
             callback.reject("no_current_item", "There is no current item in the player")
@@ -383,8 +382,8 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(null)
     }
 
-    override fun clearNowPlayingMetadata(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun clearNowPlayingMetadata(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         if (musicService.tracks.isEmpty())
             callback.reject("no_current_item", "There is no current item in the player")
@@ -393,15 +392,15 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(null)
     }
 
-    override fun removeUpcomingTracks(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun removeUpcomingTracks(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.removeUpcomingTracks()
         callback.resolve(null)
     }
 
-    override fun skip(index: Double, initialTime: Double?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun skip(index: Double, initialTime: Double?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.skip(index.toInt())
 
@@ -412,8 +411,8 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(null)
     }
 
-    override fun skipToNext(initialTime: Double?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun skipToNext(initialTime: Double?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.skipToNext()
 
@@ -424,8 +423,8 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(null)
     }
 
-    override fun skipToPrevious(initialTime: Double?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun skipToPrevious(initialTime: Double?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.skipToPrevious()
 
@@ -436,8 +435,8 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(null)
     }
 
-    override fun reset(callback: Promise): Unit = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun reset(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         CoroutineScope(Dispatchers.Main).launch {
             musicService.stop()
@@ -448,101 +447,101 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         }
     }
 
-    override fun play(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun play(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.play()
         callback.resolve(null)
     }
 
-    override fun pause(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun pause(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.pause()
         callback.resolve(null)
     }
 
-    override fun stop(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun stop(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.stop()
         callback.resolve(null)
     }
 
-    override fun seekTo(seconds: Double, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun seekTo(seconds: Double, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.seekTo(seconds.toFloat())
         callback.resolve(null)
     }
 
-    override fun seekBy(offset: Double, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun seekBy(offset: Double, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.seekBy(offset.toFloat())
         callback.resolve(null)
     }
 
-    override fun retry(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun retry(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.retry()
         callback.resolve(null)
     }
 
-    override fun setVolume(volume: Double, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun setVolume(volume: Double, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.setVolume(volume.toFloat())
         callback.resolve(null)
     }
 
-    override fun getVolume(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getVolume(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.getVolume())
     }
 
-    override fun setRate(rate: Double, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun setRate(rate: Double, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.setRate(rate.toFloat()))
     }
 
-    override fun getRate(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getRate(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.getRate())
     }
 
-    override fun setRepeatMode(mode: Double, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun setRepeatMode(mode: Double, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.setRepeatMode(RepeatMode.fromOrdinal(mode.toInt()))
         callback.resolve(null)
     }
 
-    override fun getRepeatMode(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getRepeatMode(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.getRepeatMode().ordinal)
     }
 
-    override fun setPlayWhenReady(playWhenReady: Boolean, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun setPlayWhenReady(playWhenReady: Boolean, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         musicService.playWhenReady = playWhenReady
         callback.resolve(null)
     }
 
-    override fun getPlayWhenReady(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getPlayWhenReady(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.playWhenReady)
     }
 
-    override fun getTrack(index: Double, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getTrack(index: Double, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         if (index >= 0 && index < musicService.tracks.size) {
             callback.resolve(Arguments.fromBundle(musicService.tracks[index.toInt()].originalItem))
@@ -551,14 +550,14 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         }
     }
 
-    override fun getQueue(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getQueue(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(Arguments.fromList(musicService.tracks.map { it.originalItem }))
     }
 
-    override fun setQueue(data: ReadableArray?, callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun setQueue(data: ReadableArray?, callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         try {
             musicService.clear()
@@ -569,15 +568,15 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         }
     }
 
-    override fun getActiveTrackIndex(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getActiveTrackIndex(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
         callback.resolve(
             if (musicService.tracks.isEmpty()) null else musicService.getCurrentTrackIndex()
         )
     }
 
-    override fun getActiveTrack(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getActiveTrack(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
         callback.resolve(
             if (musicService.tracks.isEmpty()) null
             else Arguments.fromBundle(
@@ -586,26 +585,26 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         )
     }
 
-    override fun getDuration(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getDuration(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.getDurationInSeconds())
     }
 
-    override fun getBufferedPosition(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getBufferedPosition(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.getBufferedPositionInSeconds())
     }
 
-    override fun getPosition(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getPosition(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
 
         callback.resolve(musicService.getPositionInSeconds())
     }
 
-    override fun getProgress(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getProgress(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
         var bundle = Bundle()
         bundle.putDouble("duration", musicService.getDurationInSeconds());
         bundle.putDouble("position", musicService.getPositionInSeconds());
@@ -613,8 +612,14 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         callback.resolve(Arguments.fromBundle(bundle))
     }
 
-    override fun getPlaybackState(callback: Promise) = run {
-        if (verifyServiceBoundOrReject(callback)) return
+    override fun getPlaybackState(callback: Promise) = launchInScope {
+        if (verifyServiceBoundOrReject(callback)) return@launchInScope
         callback.resolve(Arguments.fromBundle(musicService.getPlayerStateBundle(musicService.state)))
+    }
+
+    private fun launchInScope(block: suspend () -> Unit) {
+        scope.launch {
+            block()
+        }
     }
 }
