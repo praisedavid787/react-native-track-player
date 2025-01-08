@@ -22,18 +22,18 @@ class TrackPlayer : TurboReactPackage() {
     }
 
     override fun getReactModuleInfoProvider(): ReactModuleInfoProvider {
-        return ReactModuleInfoProvider {
-          val moduleInfos: MutableMap<String, ReactModuleInfo> = HashMap()
-          moduleInfos[MusicModule.NAME] = ReactModuleInfo(
-            MusicModule.NAME,
-            MusicModule.NAME,
-            false,  // canOverrideExistingModule
-            false,  // needsEagerInit
-            true,  // hasConstants
-            false,  // isCxxModule
-            true // isTurboModule
-          )
-          moduleInfos
-        }
+      return ReactModuleInfoProvider {
+        val moduleInfos: MutableMap<String, ReactModuleInfo> = HashMap()
+        moduleInfos[MusicModule.NAME] = ReactModuleInfo(
+          MusicModule.NAME,
+          MusicModule.NAME,
+          false,  // canOverrideExistingModule
+          false,  // needsEagerInit
+          true,  // hasConstants
+          false,  // isCxxModule
+          true // isTurboModule
+        )
+        moduleInfos
+      }
     }
 }

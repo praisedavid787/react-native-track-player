@@ -35,8 +35,7 @@ import kotlinx.coroutines.Dispatchers
  * @author Milen Pivchev @mpivchev
  */
 @ReactModule(name = MusicModule.NAME)
-class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactContext),
-    ServiceConnection {
+class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactContext), ServiceConnection {
     private var playerOptions: Bundle? = null
     private var isServiceBound = false
     private var playerSetUpPromise: Promise? = null
@@ -50,7 +49,7 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
     }
 
     companion object {
-        const val NAME = "TrackPlayerModule"
+        const val NAME = "RNTP"
     }
     
     init {
@@ -94,17 +93,6 @@ class MusicModule(reactContext: ReactApplicationContext) : NativeRNTPSpec(reactC
         }
 
         return false
-    }
-
-    /**
-     * Checks wither service is bound. Returns true or false.
-     */
-    private fun verifyServiceBound(promise: Promise): Boolean {
-        if (!isServiceBound) {
-            return false
-        }
-
-        return true
     }
 
     private fun bundleToTrack(bundle: Bundle): Track {

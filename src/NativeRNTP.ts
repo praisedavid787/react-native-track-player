@@ -21,13 +21,13 @@ export interface Spec extends TurboModule {
     CAPABILITY_BOOKMARK: number
 
     // States
-    STATE_NONE: number
-    STATE_READY: number
-    STATE_PLAYING: number
-    STATE_PAUSED: number
-    STATE_STOPPED: number
-    STATE_BUFFERING: number
-    STATE_LOADING: number
+    STATE_NONE: string
+    STATE_READY: string
+    STATE_PLAYING: string
+    STATE_PAUSED: string
+    STATE_STOPPED: string
+    STATE_BUFFERING: string
+    STATE_LOADING: string
 
     // Rating Types
     RATING_HEART: number
@@ -101,6 +101,6 @@ export interface Spec extends TurboModule {
   getVolume(): Promise<number>;
 }
 
-const module = TurboModuleRegistry.get<Spec>('MusicModule');
+const module = TurboModuleRegistry.get<Spec>('RNTP');
 export const Constants = module?.getConstants();
 export default module;
